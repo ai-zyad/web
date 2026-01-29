@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}إدارة الاشتراكات - {{ config.site_name }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div>
+                <h1 class="text-3xl font-bold gradient-text">إدارة الاشتراكات</h1>
+                <p class="text-gray-400 mt-2">إضافة وإدارة اشتراكات المستخدمين</p>
+            </div>
+            <button onclick="document.getElementById('add-enrollment-modal').classList.remove('hidden')" 
+                    class="bg-gradient-to-r from-primary to-secondary text-white font-bold py-3 px-6 rounded-lg hover:shadow-lg transition-all">
+                <i class="fas fa-plus ml-2"></i>إضافة اشتراك
+            </button>
+        </div>
+        
+        <!-- Enrollments Table -->
+        <div class="glass rounded-xl overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-white/5 text-gray-400 text-sm">
+                            <th class="text-right py-4 px-6">#</th>
+                            <th class="text-right py-4 px-6">المستخدم</th>
+                            <th class="text-right py-4 px-6">الكورس</th>
+                            <th class="text-center py-4 px-6">تاريخ الاشتراك</th>
+                            <th class="text-center py-4 px-6">الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        {% for enrollment in enrollments %}
+                        <tr class="hover:bg-white/5 transition-colors">
+                            <td class="py-4 px-6 text-gray-400">{{ enrollment.id }}</td>
+                            <td class="py-4 px-6">
+                                {% if users.get(enrollment.user_id) %}
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                                        <span class="text-sm font-bold text-white">{{ users[enrollment.user_id].full_name[0] }}</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-white">{{ users[enrollment.user_id].full_name }}</p>
+                                        <p class="text-xs text-gray-500">{{ users[enrollment.user_id].username }}</p>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <span class="text-gray-500">مستخدم محذوف #{{ enrollment.user_id }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-4 px-6">
+                                {% if courses.get(enrollment.course_id) %}
+                                <div class="flex items-center gap-3">
+                                    <img src="{{ courses[enrollment.course_id].image }}" alt="" class="w-10 h-10 rounded object-cover">
+                                    <span class="text-white">{{ courses[enrollment.course_id].title }}</span>
+                                </div>
+                                {% else %}
+                                <span class="text-gray-500">كورس محذوف #{{ enrollment.course_id }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-4 px-6 text-center text-gray-400">{{ enrollment.created_at[:10] }}</td>
+                            <td class="py-4 px-6 text-center">
+                                {% if enrollment.is_active %}
+                                <span class="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-sm">
+                                    <i class="fas fa-check ml-1"></i>مفعل
+                                </span>
+                                {% else %}
+                                <span class="bg-red-500/20 text-red-400 px-3 py-1 rounded-full text-sm">
+                                    <i class="fas fa-times ml-1"></i>معطل
+                                </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            {% if not enrollments %}
+            <div class="text-center py-12">
+                <div class="inline-flex items-center justify-center w-20 h-20 rounded-full glass mb-4">
+                    <i class="fas fa-user-check text-3xl text-gray-500"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-400">لا توجد اشتراكات</h3>
+                <p class="text-gray-500 text-sm mt-2">أضف اشتراكات جديدة</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Add Enrollment Modal -->
+<div id="add-enrollment-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="document.getElementById('add-enrollment-modal').classList.add('hidden')"></div>
+    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md">
+        <div class="glass rounded-2xl p-8">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-white">إضافة اشتراك جديد</h2>
+                <button onclick="document.getElementById('add-enrollment-modal').classList.add('hidden')" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form method="POST" action="{{ url_for('admin_add_enrollment') }}">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">المستخدم</label>
+                        <select name="user_id" required
+                                class="w-full bg-dark/50 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none">
+                            <option value="">اختر المستخدم</option>
+                            {% for u in users.values() %}
+                            <option value="{{ u.id }}">{{ u.full_name }} ({{ u.username }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">الكورس</label>
+                        <select name="course_id" required
+                                class="w-full bg-dark/50 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none">
+                            <option value="">اختر الكورس</option>
+                            {% for c in courses.values() %}
+                            <option value="{{ c.id }}">{{ c.title }} (${{ c.price }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-gradient-to-r from-primary to-secondary text-white font-bold py-3 rounded-lg hover:shadow-lg transition-all">
+                        <i class="fas fa-plus ml-2"></i>إضافة الاشتراك
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

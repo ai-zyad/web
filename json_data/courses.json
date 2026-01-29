@@ -1,0 +1,76 @@
+{
+    "courses": [
+        {
+            "id": 1,
+            "title": "دورة بايثون للمبتدئين",
+            "description": "تعلم برمجة بايثون من الصفر حتى الاحتراف",
+            "image": "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=600",
+            "price": 99,
+            "currency": "USD",
+            "is_public": false,
+            "created_at": "2024-01-01",
+            "sections": [
+                {
+                    "id": 1,
+                    "title": "مقدمة في بايثون",
+                    "videos": [
+                        {
+                            "id": 1,
+                            "title": "ما هي بايثون؟",
+                            "duration": "10:00",
+                            "video_url": "",
+                            "is_public": false
+                        },
+                        {
+                            "id": 2,
+                            "title": "تثبيت بايثون",
+                            "duration": "15:00",
+                            "video_url": "",
+                            "is_public": false
+                        }
+                    ]
+                },
+                {
+                    "id": 2,
+                    "title": "المتغيرات والأنواع",
+                    "videos": [
+                        {
+                            "id": 3,
+                            "title": "المتغيرات في بايثون",
+                            "duration": "20:00",
+                            "video_url": "",
+                            "is_public": false
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "title": "تطوير الويب بفلاسك",
+            "description": "بناء تطبيقات ويب احترافية باستخدام Flask",
+            "image": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600",
+            "price": 149,
+            "currency": "USD",
+            "is_public": false,
+            "created_at": "2024-01-15",
+            "sections": [
+                {
+                    "id": 3,
+                    "title": "مقدمة في Flask",
+                    "videos": [
+                        {
+                            "id": 4,
+                            "title": "ما هو Flask؟",
+                            "duration": "12:00",
+                            "video_url": "",
+                            "is_public": false
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "enrollments": [],
+    "notifications": []
+}

@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}في انتظار الموافقة - {{ config.site_name }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <!-- Background Effects -->
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-yellow-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-orange-500/20 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
+    </div>
+    
+    <!-- Pending Card -->
+    <div class="relative w-full max-w-md">
+        <div class="glass-card rounded-2xl p-8 shadow-2xl text-center animate-slide-in border-yellow-500/30">
+            <!-- Icon -->
+            <div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-yellow-500 to-orange-500 mb-6 animate-float">
+                <i class="fas fa-clock text-4xl text-white"></i>
+            </div>
+            
+            <!-- Title -->
+            <h2 class="text-2xl font-bold text-white mb-4">في انتظار الموافقة</h2>
+            
+            <!-- Message -->
+            <p class="text-gray-300 mb-6 leading-relaxed">
+                تم اكتشاف تسجيل دخول من جهاز أو موقع جديد.
+                <br>
+                طلبك قيد المراجعة من قبل المسؤول.
+            </p>
+            
+            <!-- Status -->
+            <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 mb-6">
+                <div class="flex items-center justify-center gap-3">
+                    <div class="spinner" style="width: 24px; height: 24px; border-width: 2px; border-color: rgba(234, 179, 8, 0.2); border-top-color: #eab308;"></div>
+                    <span class="text-yellow-400 font-medium">جاري انتظار الموافقة...</span>
+                </div>
+            </div>
+            
+            <!-- Info -->
+            <div class="text-sm text-gray-400 space-y-2">
+                <p><i class="fas fa-info-circle ml-2"></i>سيتم إعلامك فور الموافقة على طلبك</p>
+                <p><i class="fas fa-envelope ml-2"></i>ستصلك إشعار عند الموافقة</p>
+            </div>
+            
+            <!-- Cancel Button -->
+            <a href="{{ url_for('logout') }}" class="inline-block mt-6 text-gray-400 hover:text-white transition-colors">
+                <i class="fas fa-arrow-right ml-2"></i>العودة لصفحة تسجيل الدخول
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Check session status periodically
+    const pendingId = {{ pending_id }};
+    
+    function checkStatus() {
+        fetch(`/api/check-session-status/${pendingId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'approved') {
+                    // Set session token and redirect
+                    window.location.href = '{{ url_for("index") }}';
+                } else if (data.status === 'rejected') {
+                    alert('تم رفض طلب تسجيل الدخول. يرجى التواصل مع الدعم.');
+                    window.location.href = '{{ url_for("logout") }}';
+                }
+            })
+            .catch(err => console.error('Error checking status:', err));
+    }
+    
+    // Check every 3 seconds
+    setInterval(checkStatus, 3000);
+</script>
+{% endblock %}

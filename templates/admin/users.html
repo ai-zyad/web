@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}إدارة المستخدمين - {{ config.site_name }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div>
+                <h1 class="text-3xl font-bold gradient-text">إدارة المستخدمين</h1>
+                <p class="text-gray-400 mt-2">إضافة وتعديل وحذف المستخدمين</p>
+            </div>
+            <button onclick="document.getElementById('add-user-modal').classList.remove('hidden')" 
+                    class="bg-gradient-to-r from-primary to-secondary text-white font-bold py-3 px-6 rounded-lg hover:shadow-lg transition-all">
+                <i class="fas fa-plus ml-2"></i>إضافة مستخدم
+            </button>
+        </div>
+        
+        <!-- Users Table -->
+        <div class="glass rounded-xl overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-white/5 text-gray-400 text-sm">
+                            <th class="text-right py-4 px-6">#</th>
+                            <th class="text-right py-4 px-6">الاسم</th>
+                            <th class="text-right py-4 px-6">اسم المستخدم</th>
+                            <th class="text-right py-4 px-6">البريد الإلكتروني</th>
+                            <th class="text-center py-4 px-6">النوع</th>
+                            <th class="text-center py-4 px-6">الحالة</th>
+                            <th class="text-center py-4 px-6">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        {% for u in users %}
+                        <tr class="hover:bg-white/5 transition-colors">
+                            <td class="py-4 px-6 text-gray-400">{{ u.id }}</td>
+                            <td class="py-4 px-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                                        <span class="font-bold text-white">{{ u.full_name[0] }}</span>
+                                    </div>
+                                    <span class="text-white font-medium">{{ u.full_name }}</span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-6 text-gray-300">{{ u.username }}</td>
+                            <td class="py-4 px-6 text-gray-300">{{ u.email }}</td>
+                            <td class="py-4 px-6 text-center">
+                                {% if u.is_admin %}
+                                <span class="bg-primary/20 text-primary px-3 py-1 rounded-full text-sm">
+                                    <i class="fas fa-crown ml-1"></i>أدمن
+                                </span>
+                                {% else %}
+                                <span class="bg-gray-500/20 text-gray-400 px-3 py-1 rounded-full text-sm">
+                                    <i class="fas fa-user ml-1"></i>عضو
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="py-4 px-6 text-center">
+                                {% if u.is_active %}
+                                <span class="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-sm">مفعل</span>
+                                {% else %}
+                                <span class="bg-red-500/20 text-red-400 px-3 py-1 rounded-full text-sm">معطل</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-4 px-6 text-center">
+                                <a href="{{ url_for('admin_toggle_user', user_id=u.id) }}" 
+                                   class="{% if u.is_active %}text-red-400 hover:text-red-300{% else %}text-green-400 hover:text-green-300{% endif %} transition-colors"
+                                   onclick="return confirm('هل أنت متأكد من {% if u.is_active %}تعطيل{% else %}تفعيل{% endif %} هذا المستخدم؟')">
+                                    <i class="fas {% if u.is_active %}fa-user-slash{% else %}fa-user-check{% endif %} text-lg"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            {% if not users %}
+            <div class="text-center py-12">
+                <div class="inline-flex items-center justify-center w-20 h-20 rounded-full glass mb-4">
+                    <i class="fas fa-users text-3xl text-gray-500"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-400">لا يوجد مستخدمين</h3>
+                <p class="text-gray-500 text-sm mt-2">أضف مستخدمين جدد للبدء</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Add User Modal -->
+<div id="add-user-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="document.getElementById('add-user-modal').classList.add('hidden')"></div>
+    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md">
+        <div class="glass rounded-2xl p-8">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-white">إضافة مستخدم جديد</h2>
+                <button onclick="document.getElementById('add-user-modal').classList.add('hidden')" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form method="POST" action="{{ url_for('admin_create_user') }}">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">الاسم الكامل</label>
+                        <input type="text" name="full_name" required
+                               class="w-full bg-dark/50 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none"
+                               placeholder="أدخل الاسم الكامل">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">اسم المستخدم</label>
+                        <input type="text" name="username" required
+                               class="w-full bg-dark/50 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none"
+                               placeholder="أدخل اسم المستخدم">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">البريد الإلكتروني</label>
+                        <input type="email" name="email" required
+                               class="w-full bg-dark/50 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none"
+                               placeholder="أدخل البريد الإلكتروني">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-2">كلمة المرور</label>
+                        <input type="password" name="password" required
+                               class="w-full bg-dark/50 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none"
+                               placeholder="أدخل كلمة المرور">
+                    </div>
+                    
+                    <div class="flex items-center gap-3 p-3 bg-dark/50 rounded-lg">
+                        <input type="checkbox" name="is_admin" id="is_admin" class="w-5 h-5 rounded border-gray-700 text-primary focus:ring-primary">
+                        <label for="is_admin" class="text-gray-300">منح صلاحيات الأدمن</label>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-gradient-to-r from-primary to-secondary text-white font-bold py-3 rounded-lg hover:shadow-lg transition-all">
+                        <i class="fas fa-plus ml-2"></i>إضافة المستخدم
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

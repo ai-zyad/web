@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}تعديل {{ course.title }} - {{ config.site_name }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <a href="{{ url_for('admin_courses') }}" class="text-gray-400 hover:text-white text-sm mb-2 inline-block">
+                    <i class="fas fa-arrow-right ml-1"></i> العودة للكورسات
+                </a>
+                <h1 class="text-3xl font-bold gradient-text">تعديل الكورس</h1>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column - Course Info -->
+            <div class="lg:col-span-1">
+                <div class="glass rounded-xl p-6 sticky top-24">
+                    <h2 class="text-xl font-bold text-white mb-4">معلومات الكورس</h2>
+                    
+                    <form method="POST" action="{{ url_for('admin_edit_course', course_id=course.id) }}">
+                        <div class="space-y-4">
+                            <!-- Image Preview -->
+                            <div class="relative rounded-lg overflow-hidden">
+                                <img src="{{ course.image }}" alt="" class="w-full h-40 object-cover">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm text-gray-400 mb-2">عنوان الكورس</label>
+                                <input type="text" name="title" value="{{ course.title }}" required
+                                       class="w-full bg-dark/50 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm text-gray-400 mb-2">الوصف</label>
+                                <textarea name="description" rows="4"
+                                          class="w-full bg-dark/50 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none">{{ course.description }}</textarea>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm text-gray-400 mb-2">رابط الصورة</label>
+                                <input type="url" name="image_url" value="{{ course.image }}"
+                                       class="w-full bg-dark/50 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm text-gray-400 mb-2">السعر ($)</label>
+                                <input type="number" name="price" value="{{ course.price }}" min="0" step="0.01"
+                                       class="w-full bg-dark/50 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none">
+                            </div>
+                            
+                            <div class="flex items-center gap-3 p-3 bg-dark/50 rounded-lg">
+                                <input type="checkbox" name="is_public" id="is_public" {% if course.is_public %}checked{% endif %} 
+                                       class="w-5 h-5 rounded border-gray-700 text-primary focus:ring-primary">
+                                <label for="is_public" class="text-gray-300">كورس مجاني (عام)</label>
+                            </div>
+                            
+                            <button type="submit" class="w-full bg-gradient-to-r from-primary to-secondary text-white font-bold py-3 rounded-lg hover:shadow-lg transition-all">
+                                <i class="fas fa-save ml-2"></i>حفظ التغييرات
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Right Column - Sections & Videos -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Add Section -->
+                <div class="glass rounded-xl p-6">
+                    <h2 class="text-xl font-bold text-white mb-4">
+                        <i class="fas fa-plus-circle ml-2 text-primary"></i>إضافة قسم جديد
+                    </h2>
+                    <form method="POST" action="{{ url_for('admin_add_section', course_id=course.id) }}">
+                        <div class="flex gap-3">
+                            <input type="text" name="title" required
+                                   class="flex-1 bg-dark/50 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-primary focus:outline-none"
+                                   placeholder="عنوان القسم">
+                            <button type="submit" class="bg-primary hover:bg-primary/80 text-white px-6 py-3 rounded-lg transition-colors">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Sections List -->
+                {% for section in course.sections %}
+                <div class="glass rounded-xl overflow-hidden">
+                    <!-- Section Header -->
+                    <div class="bg-gradient-to-r from-primary/20 to-secondary/20 px-6 py-4 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-folder-open text-primary"></i>
+                            <h3 class="font-bold text-white">{{ section.title }}</h3>
+                            <span class="text-sm text-gray-400">({{ section.videos|length }} فيديو)</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Videos List -->
+                    <div class="divide-y divide-white/5">
+                        {% for video in section.videos %}
+                        <div class="px-6 py-3 flex items-center justify-between bg-dark/30">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded bg-dark flex items-center justify-center">
+                                    <i class="fas fa-play-circle text-gray-500 text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="text-white text-sm">{{ video.title }}</p>
+                                    <p class="text-xs text-gray-500">{{ video.duration }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                {% if video.is_public %}
+                                <span class="text-xs text-primary"><i class="fas fa-unlock"></i> عام</span>
+                                {% else %}
+                                <span class="text-xs text-gray-600"><i class="fas fa-lock"></i> خاص</span>
+                                {% endif %}
+                                <a href="{{ url_for('admin_make_video_public', course_id=course.id, video_id=video.id) }}" 
+                                   class="text-sm {% if video.is_public %}text-gray-500 hover:text-white{% else %}text-primary hover:text-primary/80{% endif %} transition-colors"
+                                   title="{% if video.is_public %}جعل خاص{% else %}جعل عام{% endif %}">
+                                    <i class="fas {% if video.is_public %}fa-lock{% else %}fa-unlock{% endif %}"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Add Video Form -->
+                    <div class="px-6 py-4 bg-dark/50 border-t border-white/5">
+                        <form method="POST" action="{{ url_for('admin_add_video', course_id=course.id, section_id=section.id) }}" class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                            <input type="text" name="title" required placeholder="عنوان الفيديو"
+                                   class="md:col-span-2 bg-dark/50 border border-gray-700 rounded-lg px-4 py-2 text-white text-sm focus:border-primary focus:outline-none">
+                            <input type="text" name="duration" placeholder="المدة (مثال: 10:00)"
+                                   class="bg-dark/50 border border-gray-700 rounded-lg px-4 py-2 text-white text-sm focus:border-primary focus:outline-none">
+                            <div class="flex gap-2">
+                                <input type="url" name="video_url" placeholder="رابط الفيديو"
+                                       class="flex-1 bg-dark/50 border border-gray-700 rounded-lg px-4 py-2 text-white text-sm focus:border-primary focus:outline-none">
+                                <button type="submit" class="bg-secondary hover:bg-secondary/80 text-white px-4 py-2 rounded-lg transition-colors">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                            <div class="md:col-span-4 flex items-center gap-2">
+                                <input type="checkbox" name="is_public" id="video_public_{{ section.id }}" class="w-4 h-4 rounded border-gray-700 text-primary">
+                                <label for="video_public_{{ section.id }}" class="text-sm text-gray-400">جعل الفيديو عاماً (لغير المشتركين)</label>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+                
+                {% if not course.sections %}
+                <div class="glass rounded-xl p-12 text-center">
+                    <div class="inline-flex items-center justify-center w-20 h-20 rounded-full glass mb-6">
+                        <i class="fas fa-folder-open text-3xl text-gray-500"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-400 mb-2">لا توجد أقسام</h3>
+                    <p class="text-gray-500 text-sm">أضف أقسام وفيديوهات للكورس</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

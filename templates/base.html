@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{ config.site_name }} - منصة تعليمية متكاملة">
+    <title>{% block title %}{{ config.site_name }}{% endblock %}</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#10b981',
+                        secondary: '#0ea5e9',
+                        accent: '#06b6d4',
+                        dark: '#0f172a',
+                        darker: '#020617'
+                    },
+                    fontFamily: {
+                        'cairo': ['Cairo', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        * {
+            font-family: 'Cairo', sans-serif;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #10b981, #0ea5e9);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #0ea5e9, #10b981);
+        }
+        
+        /* Glass Effect */
+        .glass {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .glass-card {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(14, 165, 233, 0.1));
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        
+        /* Gradient Text */
+        .gradient-text {
+            background: linear-gradient(135deg, #10b981, #0ea5e9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Gradient Border */
+        .gradient-border {
+            position: relative;
+        }
+        .gradient-border::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 2px;
+            background: linear-gradient(135deg, #10b981, #0ea5e9);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+        }
+        
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(14, 165, 233, 0.5); }
+        }
+        .animate-glow {
+            animation: glow 2s ease-in-out infinite;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-slide-in {
+            animation: slideIn 0.5s ease-out forwards;
+        }
+        
+        /* Video Player Protection */
+        .video-container {
+            position: relative;
+        }
+        .video-container::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: transparent;
+            z-index: 10;
+            pointer-events: none;
+        }
+        
+        /* Prevent Selection */
+        .no-select {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+            border: 3px solid rgba(16, 185, 129, 0.2);
+            border-top-color: #10b981;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Course Card Hover */
+        .course-card {
+            transition: all 0.3s ease;
+        }
+        .course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(16, 185, 129, 0.2);
+        }
+        
+        /* Sidebar Collapse */
+        .sidebar-section {
+            transition: all 0.3s ease;
+        }
+        .sidebar-section.collapsed .videos-list {
+            max-height: 0;
+            overflow: hidden;
+        }
+        .sidebar-section .videos-list {
+            max-height: 1000px;
+            transition: max-height 0.3s ease;
+        }
+        
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 9999;
+            transform: translateX(-150%);
+            transition: transform 0.3s ease;
+        }
+        .toast.show {
+            transform: translateX(0);
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-darker text-white min-h-screen flex flex-col">
+    
+    <!-- Navbar -->
+    <nav class="glass sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo & Site Name (Right side in RTL) -->
+                <div class="flex items-center gap-3">
+                    {% if config.site_logo %}
+                    <img src="{{ config.site_logo }}" alt="Logo" class="h-10 w-10 rounded-full object-cover">
+                    {% else %}
+                    <div class="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                        <i class="fas fa-graduation-cap text-white text-lg"></i>
+                    </div>
+                    {% endif %}
+                    <span class="text-xl font-bold gradient-text">{{ config.site_name }}</span>
+                </div>
+                
+                <!-- Navigation Links -->
+                <div class="hidden md:flex items-center gap-6">
+                    <a href="{{ url_for('index') }}" class="text-gray-300 hover:text-primary transition-colors">
+                        <i class="fas fa-home ml-1"></i> الرئيسية
+                    </a>
+                    
+                    {% if user %}
+                    <!-- Notifications -->
+                    <a href="{{ url_for('notifications') }}" class="relative text-gray-300 hover:text-primary transition-colors">
+                        <i class="fas fa-bell text-xl"></i>
+                        <span id="notification-badge" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+                    </a>
+                    
+                    <!-- User Menu -->
+                    <div class="relative group">
+                        <button class="flex items-center gap-2 text-gray-300 hover:text-white transition-colors">
+                            <div class="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                                <span class="text-sm font-bold">{{ user.full_name[0] }}</span>
+                            </div>
+                            <span class="hidden lg:inline">{{ user.full_name }}</span>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </button>
+                        
+                        <div class="absolute top-full left-0 mt-2 w-48 glass rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                            {% if user.is_admin %}
+                            <a href="{{ url_for('admin_dashboard') }}" class="block px-4 py-2 text-gray-300 hover:text-primary hover:bg-white/5 rounded-t-lg transition-colors">
+                                <i class="fas fa-cog ml-2"></i> لوحة التحكم
+                            </a>
+                            {% endif %}
+                            <a href="{{ url_for('logout') }}" class="block px-4 py-2 text-red-400 hover:text-red-300 hover:bg-white/5 rounded-b-lg transition-colors">
+                                <i class="fas fa-sign-out-alt ml-2"></i> تسجيل الخروج
+                            </a>
+                        </div>
+                    </div>
+                    {% else %}
+                    <a href="{{ url_for('login') }}" class="bg-gradient-to-r from-primary to-secondary text-white px-6 py-2 rounded-full hover:shadow-lg hover:shadow-primary/30 transition-all">
+                        <i class="fas fa-sign-in-alt ml-2"></i> تسجيل الدخول
+                    </a>
+                    {% endif %}
+                </div>
+                
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" class="md:hidden text-gray-300 hover:text-white">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden glass border-t border-white/10">
+            <div class="px-4 py-3 space-y-2">
+                <a href="{{ url_for('index') }}" class="block py-2 text-gray-300 hover:text-primary">
+                    <i class="fas fa-home ml-2"></i> الرئيسية
+                </a>
+                {% if user %}
+                <a href="{{ url_for('notifications') }}" class="block py-2 text-gray-300 hover:text-primary">
+                    <i class="fas fa-bell ml-2"></i> الإشعارات
+                </a>
+                {% if user.is_admin %}
+                <a href="{{ url_for('admin_dashboard') }}" class="block py-2 text-gray-300 hover:text-primary">
+                    <i class="fas fa-cog ml-2"></i> لوحة التحكم
+                </a>
+                {% endif %}
+                <a href="{{ url_for('logout') }}" class="block py-2 text-red-400 hover:text-red-300">
+                    <i class="fas fa-sign-out-alt ml-2"></i> تسجيل الخروج
+                </a>
+                {% else %}
+                <a href="{{ url_for('login') }}" class="block py-2 text-primary">
+                    <i class="fas fa-sign-in-alt ml-2"></i> تسجيل الدخول
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="fixed top-20 left-4 z-50 space-y-2">
+        {% for category, message in messages %}
+        <div class="glass px-6 py-4 rounded-lg shadow-xl animate-slide-in flex items-center gap-3
+                    {% if category == 'error' %}border-r-4 border-red-500{% elif category == 'success' %}border-r-4 border-primary{% elif category == 'warning' %}border-r-4 border-yellow-500{% else %}border-r-4 border-secondary{% endif %}">
+            {% if category == 'error' %}
+            <i class="fas fa-exclamation-circle text-red-500 text-xl"></i>
+            {% elif category == 'success' %}
+            <i class="fas fa-check-circle text-primary text-xl"></i>
+            {% elif category == 'warning' %}
+            <i class="fas fa-exclamation-triangle text-yellow-500 text-xl"></i>
+            {% else %}
+            <i class="fas fa-info-circle text-secondary text-xl"></i>
+            {% endif %}
+            <span>{{ message }}</span>
+            <button onclick="this.parentElement.remove()" class="mr-2 text-gray-400 hover:text-white">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    
+    <!-- Main Content -->
+    <main class="flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="glass border-t border-white/10 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                        <i class="fas fa-code text-white text-sm"></i>
+                    </div>
+                    <span class="text-gray-400 text-sm">
+                        &copy; {{ now.year if now else '2024' }} {{ config.site_name }}. جميع الحقوق محفوظة.
+                    </span>
+                </div>
+                <div class="flex items-center gap-4 text-gray-400 text-sm">
+                    <span>Powered by</span>
+                    <span class="gradient-text font-semibold">Python Flask</span>
+                    <span class="text-gray-600">|</span>
+                    <span class="gradient-text font-semibold">JSON Database</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script>
+        // Mobile Menu Toggle
+        document.getElementById('mobile-menu-btn')?.addEventListener('click', function() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        });
+        
+        // Update Notification Badge
+        {% if user %}
+        function updateNotificationBadge() {
+            fetch('{{ url_for("api_unread_count") }}')
+                .then(res => res.json())
+                .then(data => {
+                    const badge = document.getElementById('notification-badge');
+                    if (data.count > 0) {
+                        badge.textContent = data.count;
+                        badge.classList.remove('hidden');
+                    } else {
+                        badge.classList.add('hidden');
+                    }
+                })
+                .catch(err => console.error('Error fetching notifications:', err));
+        }
+        
+        // Update every 30 seconds
+        updateNotificationBadge();
+        setInterval(updateNotificationBadge, 30000);
+        {% endif %}
+        
+        // Prevent Right Click on Videos
+        document.querySelectorAll('video').forEach(video => {
+            video.addEventListener('contextmenu', e => e.preventDefault());
+        });
+        
+        // Prevent DevTools Keys
+        document.addEventListener('keydown', function(e) {
+            // F12
+            if (e.key === 'F12') {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+Shift+I/J/C
+            if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+U
+            if (e.ctrlKey && e.key === 'u') {
+                e.preventDefault();
+                return false;
+            }
+        });
+        
+        // Detect DevTools Opening
+        let devtoolsOpen = false;
+        const threshold = 160;
+        
+        setInterval(function() {
+            const widthThreshold = window.outerWidth - window.innerWidth > threshold;
+            const heightThreshold = window.outerHeight - window.innerHeight > threshold;
+            
+            if (widthThreshold || heightThreshold) {
+                if (!devtoolsOpen) {
+                    devtoolsOpen = true;
+                    document.body.innerHTML = '<div class="fixed inset-0 bg-darker flex items-center justify-center z-[9999]"><div class="text-center"><i class="fas fa-shield-alt text-6xl text-red-500 mb-4"></i><h1 class="text-2xl font-bold text-white">تم اكتشاف محاولة غير مصرح بها</h1><p class="text-gray-400 mt-2">يرجى إغلاق أدوات المطور</p></div></div>';
+                }
+            } else {
+                devtoolsOpen = false;
+            }
+        }, 1000);
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

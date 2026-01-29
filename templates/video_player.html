@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block title %}{{ video.title }} - {{ course.title }} - {{ config.site_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .video-wrapper {
+        position: relative;
+        background: #000;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    
+    .watermark {
+        position: absolute;
+        padding: 8px 16px;
+        background: rgba(0, 0, 0, 0.6);
+        color: rgba(255, 255, 255, 0.4);
+        font-size: 14px;
+        font-weight: bold;
+        pointer-events: none;
+        z-index: 100;
+        user-select: none;
+        border-radius: 4px;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    }
+    
+    .protection-overlay {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 50;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-darker">
+    <!-- Header -->
+    <div class="glass border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <a href="{{ url_for('course_detail', course_id=course.id) }}" class="text-gray-400 hover:text-white text-sm mb-1 inline-block">
+                        <i class="fas fa-arrow-right ml-1"></i> العودة للكورس
+                    </a>
+                    <h1 class="text-xl font-bold text-white">{{ video.title }}</h1>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span class="text-gray-400 text-sm">
+                        <i class="fas fa-clock ml-1"></i>{{ video.duration }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Video Player -->
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="video-wrapper aspect-video relative" id="video-container">
+            <video id="main-video" 
+                   class="w-full h-full"
+                   controls
+                   controlsList="nodownload noremoteplayback"
+                   disablePictureInPicture
+                   oncontextmenu="return false;"
+                   autoplay
+                   poster="{{ course.image }}">
+                {% if video.video_url %}
+                <source src="{{ video.video_url }}" type="video/mp4">
+                {% endif %}
+                متصفحك لا يدعم تشغيل الفيديو
+            </video>
+            
+            <!-- Dynamic Watermark -->
+            <div class="watermark" id="dynamic-watermark">
+                {{ user.username }} | {{ user.full_name }} | {{ user.id }}
+            </div>
+            
+            <!-- Protection Overlay -->
+            <div class="protection-overlay"></div>
+        </div>
+        
+        <!-- Video Info -->
+        <div class="mt-8 glass rounded-xl p-6">
+            <h2 class="text-2xl font-bold text-white mb-4">{{ video.title }}</h2>
+            <div class="flex items-center gap-6 text-sm text-gray-400 mb-4">
+                <span><i class="fas fa-book ml-1 text-primary"></i>{{ course.title }}</span>
+                <span><i class="fas fa-clock ml-1 text-secondary"></i>{{ video.duration }}</span>
+                {% if video.is_public %}
+                <span class="text-primary"><i class="fas fa-globe ml-1"></i>عام</span>
+                {% else %}
+                <span class="text-gray-500"><i class="fas fa-lock ml-1"></i>خاص</span>
+                {% endif %}
+            </div>
+            <p class="text-gray-400 leading-relaxed">{{ course.description }}</p>
+        </div>
+        
+        <!-- Security Notice -->
+        <div class="mt-6 bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
+            <div class="flex items-start gap-3">
+                <i class="fas fa-shield-alt text-yellow-500 text-xl mt-0.5"></i>
+                <div>
+                    <h3 class="font-bold text-white mb-1">حماية المحتوى</h3>
+                    <p class="text-gray-400 text-sm">
+                        هذا الفيديو محمي بعلامة مائية شخصية. أي محاولة لتسجيل أو تصوير الشاشة سيتم تتبعها.
+                        <br>
+                        <span class="text-yellow-500">ممنوع منعاً باتاً: التصوير، أخذ لقطة الشاشة، أو مشاركة المحتوى.</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Dynamic Watermark Position
+    const watermark = document.getElementById('dynamic-watermark');
+    const positions = [
+        { top: '20px', right: '20px' },
+        { top: '20px', left: '20px' },
+        { bottom: '60px', right: '20px' },
+        { bottom: '60px', left: '20px' },
+        { top: '50%', right: '20px', transform: 'translateY(-50%)' },
+        { top: '50%', left: '20px', transform: 'translateY(-50%)' }
+    ];
+    
+    let currentPos = 0;
+    setInterval(() => {
+        const pos = positions[currentPos];
+        watermark.style.top = pos.top || 'auto';
+        watermark.style.bottom = pos.bottom || 'auto';
+        watermark.style.left = pos.left || 'auto';
+        watermark.style.right = pos.right || 'auto';
+        watermark.style.transform = pos.transform || 'none';
+        currentPos = (currentPos + 1) % positions.length;
+    }, 4000);
+    
+    // Prevent PrintScreen
+    document.addEventListener('keyup', function(e) {
+        if (e.key === 'PrintScreen') {
+            e.preventDefault();
+            alert('التقاط الشاشة غير مسموح به!');
+            return false;
+        }
+    });
+    
+    // Prevent Copy
+    document.addEventListener('copy', function(e) {
+        e.preventDefault();
+        return false;
+    });
+    
+    // Pause video when tab is hidden
+    document.addEventListener('visibilitychange', function() {
+        const video = document.getElementById('main-video');
+        if (document.hidden && video && !video.paused) {
+            video.pause();
+        }
+    });
+    
+    // Detect screen recording (basic detection)
+    let lastWidth = window.innerWidth;
+    let lastHeight = window.innerHeight;
+    
+    window.addEventListener('resize', function() {
+        const widthDiff = Math.abs(window.innerWidth - lastWidth);
+        const heightDiff = Math.abs(window.innerHeight - lastHeight);
+        
+        // If significant size change, might be screen recording software
+        if (widthDiff > 100 || heightDiff > 100) {
+            const video = document.getElementById('main-video');
+            if (video && !video.paused) {
+                video.pause();
+            }
+        }
+        
+        lastWidth = window.innerWidth;
+        lastHeight = window.innerHeight;
+    });
+    
+    // Add random noise to watermark
+    setInterval(() => {
+        const opacity = 0.3 + Math.random() * 0.3;
+        watermark.style.opacity = opacity;
+    }, 2000);
+</script>
+{% endblock %}

@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}شراء {{ course.title }} - {{ config.site_name }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Back Button -->
+        <a href="{{ url_for('index') }}" class="inline-flex items-center text-gray-400 hover:text-white transition-colors mb-8">
+            <i class="fas fa-arrow-right ml-2"></i> العودة للكورسات
+        </a>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Side - Course Content Preview -->
+            <div class="lg:col-span-2">
+                <!-- Course Preview -->
+                <div class="glass rounded-2xl overflow-hidden mb-8">
+                    <div class="relative h-64 md:h-80">
+                        <img src="{{ course.image }}" alt="{{ course.title }}" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-darker via-darker/50 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-6">
+                            <h1 class="text-3xl font-bold text-white mb-2">{{ course.title }}</h1>
+                            <p class="text-gray-300">{{ course.description }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Course Content -->
+                <div class="glass rounded-2xl p-6">
+                    <h2 class="text-xl font-bold text-white mb-6">
+                        <i class="fas fa-list-ul ml-2 text-primary"></i>محتوى الكورس
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        {% for section in course.sections %}
+                        <div class="border border-white/10 rounded-xl overflow-hidden">
+                            <!-- Section Header -->
+                            <div class="bg-white/5 px-4 py-3 flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-folder-open text-primary"></i>
+                                    <span class="font-medium text-white">{{ section.title }}</span>
+                                </div>
+                                <span class="text-sm text-gray-500">{{ section.videos|length }} فيديو</span>
+                            </div>
+                            
+                            <!-- Videos List -->
+                            <div class="divide-y divide-white/5">
+                                {% for video in section.videos %}
+                                <div class="px-4 py-3 flex items-center gap-3 bg-dark/30">
+                                    <div class="flex-shrink-0 w-8 h-8 rounded bg-dark flex items-center justify-center">
+                                        {% if video.is_public %}
+                                        <i class="fas fa-play-circle text-primary text-sm"></i>
+                                        {% else %}
+                                        <i class="fas fa-lock text-gray-600 text-sm"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="flex-grow">
+                                        <p class="text-sm {% if video.is_public %}text-gray-300{% else %}text-gray-500{% endif %}">{{ video.title }}</p>
+                                    </div>
+                                    <span class="text-xs text-gray-500">{{ video.duration }}</span>
+                                    {% if video.is_public %}
+                                    <span class="text-xs text-primary">مجاني</span>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Side - Purchase Card -->
+            <div class="lg:col-span-1">
+                <div class="glass rounded-2xl p-6 sticky top-24">
+                    <!-- Course Image -->
+                    <div class="relative rounded-xl overflow-hidden mb-6">
+                        <img src="{{ course.image }}" alt="{{ course.title }}" class="w-full h-48 object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-darker to-transparent"></div>
+                    </div>
+                    
+                    <!-- Price -->
+                    <div class="text-center mb-6">
+                        <div class="text-4xl font-bold gradient-text">${{ course.price }}</div>
+                        <div class="text-gray-500 text-sm mt-1">سعر الكورس</div>
+                    </div>
+                    
+                    <!-- Stats -->
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="bg-dark/50 rounded-lg p-3 text-center">
+                            <div class="text-2xl font-bold text-white">{{ total_videos }}</div>
+                            <div class="text-xs text-gray-500">فيديو</div>
+                        </div>
+                        <div class="bg-dark/50 rounded-lg p-3 text-center">
+                            <div class="text-2xl font-bold text-white">{{ course.sections|length }}</div>
+                            <div class="text-xs text-gray-500">قسم</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Features -->
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-center gap-2 text-sm text-gray-400">
+                            <i class="fas fa-check-circle text-primary"></i>
+                            <span>وصول كامل مدى الحياة</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-gray-400">
+                            <i class="fas fa-check-circle text-primary"></i>
+                            <span>شهادة إتمام</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-gray-400">
+                            <i class="fas fa-check-circle text-primary"></i>
+                            <span>دعم فني مباشر</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-gray-400">
+                            <i class="fas fa-check-circle text-primary"></i>
+                            <span>تحديثات مجانية</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Purchase Button -->
+                    <a href="{{ telegram_link }}" 
+                       target="_blank"
+                       class="block w-full bg-gradient-to-r from-primary to-secondary text-white font-bold py-4 px-6 rounded-xl hover:shadow-xl hover:shadow-primary/30 transform hover:scale-[1.02] transition-all text-center">
+                        <i class="fas fa-shopping-cart ml-2"></i>
+                        شراء الآن
+                    </a>
+                    
+                    <!-- Note -->
+                    <div class="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-info-circle text-yellow-500 mt-0.5"></i>
+                            <p class="text-xs text-gray-400">
+                                بعد الدفع، سيتم تفعيل الكورس يدوياً من قبل الأدمن خلال 24 ساعة.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Contact -->
+                    <div class="mt-4 text-center">
+                        <p class="text-sm text-gray-500">
+                            <i class="fab fa-telegram ml-1"></i>
+                            للاستفسار: <a href="{{ telegram_link }}" target="_blank" class="text-primary hover:underline">Telegram</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

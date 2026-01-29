@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block title %}{{ config.site_name }}{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative py-20 overflow-hidden">
+    <!-- Background -->
+    <div class="absolute inset-0">
+        <div class="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-primary/10 to-transparent"></div>
+        <div class="absolute bottom-0 left-0 w-1/2 h-full bg-gradient-to-r from-secondary/10 to-transparent"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-3xl"></div>
+    </div>
+    
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+            <!-- Badge -->
+            <div class="inline-flex items-center gap-2 glass px-4 py-2 rounded-full mb-6 animate-slide-in">
+                <span class="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+                <span class="text-sm text-gray-300">منصة تعليمية متكاملة</span>
+            </div>
+            
+            <!-- Title -->
+            <h1 class="text-4xl md:text-6xl font-bold mb-6 animate-slide-in" style="animation-delay: 0.1s;">
+                <span class="gradient-text">تعلم بذكاء</span>
+                <br>
+                <span class="text-white">واحترف بثقة</span>
+            </h1>
+            
+            <!-- Description -->
+            <p class="text-xl text-gray-400 max-w-2xl mx-auto mb-10 animate-slide-in" style="animation-delay: 0.2s;">
+                منصة تعليمية متكاملة توفر لك أفضل الكورسات في البرمجة والتطوير مع حماية متقدمة للمحتوى
+            </p>
+            
+            <!-- CTA Buttons -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 animate-slide-in" style="animation-delay: 0.3s;">
+                {% if not user %}
+                <a href="{{ url_for('login') }}" class="bg-gradient-to-r from-primary to-secondary text-white font-bold py-4 px-8 rounded-full hover:shadow-xl hover:shadow-primary/30 transform hover:scale-105 transition-all flex items-center gap-2">
+                    <i class="fas fa-rocket"></i>
+                    ابدأ رحلتك التعليمية
+                </a>
+                {% else %}
+                <a href="#courses" class="bg-gradient-to-r from-primary to-secondary text-white font-bold py-4 px-8 rounded-full hover:shadow-xl hover:shadow-primary/30 transform hover:scale-105 transition-all flex items-center gap-2">
+                    <i class="fas fa-play-circle"></i>
+                    استعرض الكورسات
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-12 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div class="glass rounded-xl p-6 text-center">
+                <div class="text-3xl font-bold gradient-text mb-2">{{ courses|length }}</div>
+                <div class="text-gray-400 text-sm">كورس متاح</div>
+            </div>
+            <div class="glass rounded-xl p-6 text-center">
+                <div class="text-3xl font-bold gradient-text mb-2">{% if user %}{{ enrolled_courses|length }}{% else %}0{% endif %}</div>
+                <div class="text-gray-400 text-sm">كورس مشترك</div>
+            </div>
+            <div class="glass rounded-xl p-6 text-center">
+                <div class="text-3xl font-bold gradient-text mb-2">100+</div>
+                <div class="text-gray-400 text-sm">فيديو تعليمي</div>
+            </div>
+            <div class="glass rounded-xl p-6 text-center">
+                <div class="text-3xl font-bold gradient-text mb-2">24/7</div>
+                <div class="text-gray-400 text-sm">دعم فني</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Courses Section -->
+<section id="courses" class="py-16 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Section Header -->
+        <div class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">
+                <span class="gradient-text">الكورسات المتاحة</span>
+            </h2>
+            <p class="text-gray-400 max-w-xl mx-auto">
+                اختر من مجموعة متنوعة من الكورسات الاحترافية في البرمجة والتطوير
+            </p>
+        </div>
+        
+        <!-- Courses Grid -->
+        {% if courses %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for course in courses %}
+            <div class="course-card glass rounded-2xl overflow-hidden group">
+                <!-- Image -->
+                <div class="relative h-48 overflow-hidden">
+                    <img src="{{ course.image }}" 
+                         alt="{{ course.title }}" 
+                         class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-darker via-transparent to-transparent"></div>
+                    
+                    <!-- Price Badge -->
+                    <div class="absolute top-4 right-4 glass px-3 py-1 rounded-full">
+                        <span class="text-primary font-bold">${{ course.price }}</span>
+                    </div>
+                    
+                    <!-- Public Badge -->
+                    {% if course.is_public %}
+                    <div class="absolute top-4 left-4 bg-primary/80 px-3 py-1 rounded-full">
+                        <span class="text-white text-xs font-medium"><i class="fas fa-globe ml-1"></i> مجاني</span>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Content -->
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-white mb-2 group-hover:text-primary transition-colors">
+                        {{ course.title }}
+                    </h3>
+                    <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                        {{ course.description }}
+                    </p>
+                    
+                    <!-- Stats -->
+                    <div class="flex items-center gap-4 text-sm text-gray-500 mb-4">
+                        <span><i class="fas fa-video ml-1"></i>{{ course.sections|sum(attribute='videos')|length }} فيديو</span>
+                        <span><i class="fas fa-layer-group ml-1"></i>{{ course.sections|length }} قسم</span>
+                    </div>
+                    
+                    <!-- Action Button -->
+                    {% if user %}
+                        {% if is_enrolled(course.id) or course.is_public %}
+                        <a href="{{ url_for('course_detail', course_id=course.id) }}" 
+                           class="block w-full bg-gradient-to-r from-primary to-secondary text-white text-center py-3 rounded-lg hover:shadow-lg hover:shadow-primary/30 transition-all">
+                            <i class="fas fa-play ml-2"></i>مشاهدة الكورس
+                        </a>
+                        {% else %}
+                        <a href="{{ url_for('course_detail', course_id=course.id) }}" 
+                           class="block w-full glass border border-primary/30 text-primary text-center py-3 rounded-lg hover:bg-primary/10 transition-all">
+                            <i class="fas fa-shopping-cart ml-2"></i>شراء الكورس
+                        </a>
+                        {% endif %}
+                    {% else %}
+                    <a href="{{ url_for('login') }}" 
+                       class="block w-full glass border border-gray-700 text-gray-400 text-center py-3 rounded-lg hover:border-primary hover:text-primary transition-all">
+                        <i class="fas fa-lock ml-2"></i>سجل الدخول للمشاهدة
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-16">
+            <div class="inline-flex items-center justify-center w-24 h-24 rounded-full glass mb-6">
+                <i class="fas fa-book-open text-4xl text-gray-500"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-400 mb-2">لا توجد كورسات متاحة</h3>
+            <p class="text-gray-500">سيتم إضافة كورسات جديدة قريباً</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-16 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold gradient-text mb-4">مميزات المنصة</h2>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="glass rounded-xl p-6 text-center hover:border-primary/50 transition-colors">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/20 mb-4">
+                    <i class="fas fa-shield-alt text-2xl text-primary"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white mb-2">حماية متقدمة</h3>
+                <p class="text-gray-400 text-sm">حماية قوية للفيديوهات ضد التصوير والتسريب</p>
+            </div>
+            
+            <div class="glass rounded-xl p-6 text-center hover:border-secondary/50 transition-colors">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-secondary/20 mb-4">
+                    <i class="fas fa-mobile-alt text-2xl text-secondary"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white mb-2">تجربة سلسة</h3>
+                <p class="text-gray-400 text-sm">تصميم متجاوب يعمل على جميع الأجهزة</p>
+            </div>
+            
+            <div class="glass rounded-xl p-6 text-center hover:border-accent/50 transition-colors">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/20 mb-4">
+                    <i class="fas fa-bell text-2xl text-accent"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white mb-2">إشعارات فورية</h3>
+                <p class="text-gray-400 text-sm">نظام إشعارات متكامل للطلاب والمسؤولين</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Smooth scroll to courses
+    document.querySelector('a[href="#courses"]')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.getElementById('courses').scrollIntoView({ behavior: 'smooth' });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,19 @@
+{
+    "site_name": "منصتي التعليمية",
+    "site_logo": "",
+    "admin_username": "admin",
+    "admin_password_hash": "scrypt:32768:8:1$2r6y8wZNdZPJvKzF$5c0e5e1e5c0e5e1e5c0e5e1e5c0e5e1e5c0e5e1e5c0e5e1e5c0e5e1e5c0e5e1e",
+    "admin_email": "admin@platform.com",
+    "telegram_link": "https://t.me/your_channel",
+    "colors": {
+        "primary": "#10b981",
+        "secondary": "#0ea5e9",
+        "accent": "#06b6d4"
+    },
+    "security": {
+        "secret_key": "super_secret_key_change_this_in_production_2024",
+        "session_timeout": 3600,
+        "max_login_attempts": 5,
+        "lockout_duration": 900
+    }
+}
